@@ -29,7 +29,7 @@ function evmc(states, S, R, γ)
 end
 
 """
-first visit MC, return at first occurence
+first visit MC, return at first occurence of each state
 """
 function fvmc(states, S, R, γ)
     n = zeros(Int, length(states)) # n_ts[i] := counter of visiting state i
@@ -53,6 +53,24 @@ function fvmc(states, S, R, γ)
     return Vs ./ n # average V(s) := V(s)/n(s)
 end
 
+"""
+TD(0)
+"""
+function TD(states, S, R, γ, α)
+    V = zeros(length(states)) # output
+    for t ∈ eachindex(S)
+        if t == length(S) # last index
+            V[S[t]] += (α*(R[t] - V[S[t]]))  # terminal reward = 0
+            println([t, S[t], R[t], V[S[t]],])
+        else
+            V[S[t]] += (α*(R[t] + γ*V[S[t+1]] - V[S[t]]))
+            println([t, S[t], R[t], V[S[t]], V[S[t+1]]])
+        end
+    end
+    return V
+end
+
+
 
 function main()
     # encode {"A B T"} = {1 2 3}, {"stay switch"} = {1 2}, like  a graph struct
@@ -72,7 +90,7 @@ function main()
         push!(R_eps, temp)
     end
     # or list of lists of where each list := one episode:
-    S = [[1,1,2],[1,2,1,2], [1,2]]
+    S = [[1,1,2],[1,2,1,2], [1,2]] # 1a:  [A, A, B, T], [A, B, A, B, T], [A, B, T]
     A = [[1,2,1],[2,2,2,1], [2,1]] # actions dont matter for computation
     R = Vector{Vector{Float64}}([[1,0,2], [0,1,0,2], [0,2]])
     # or list of dicts...:
@@ -83,4 +101,10 @@ function main()
     println("v^π(s) from every-visit-MC is ",Vs)
     Vs = fvmc(["A", "B"], S, R, γ)  # fvmc caller
     println("v^π(s) from first-visit-MC is ",Vs)
+
+    # 1b: [A, B, A, A, B, T]
+    S = [1,2,1,1,2]
+    A = [2,2,1,2,1]
+    R = Vector{Float64}([0,1,1,0,2])
+    TD(["A", "B"],S, R, γ, α)
 end
