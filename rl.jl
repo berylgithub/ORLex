@@ -54,9 +54,9 @@ function fvmc(states, S, R, γ)
 end
 
 """
-TD(0)
+TD(0), manually coded terminal condition (sometime later (or not) will change to general TD(n))
 """
-function TD(states, S, R, γ, α)
+function TD0(states, S, R, γ, α)
     V = zeros(length(states)) # output
     for t ∈ eachindex(S)
         if t == length(S) # last index
@@ -69,6 +69,27 @@ function TD(states, S, R, γ, α)
     end
     return V
 end
+
+"""
+TD(2)
+"""
+function TD2(states, S, R, γ, α)
+    V = zeros(length(states)) # output
+    for t ∈ eachindex(S)
+        if t == length(S) # last index
+            V[S[t]] += (α*(R[t] - V[S[t]]))  # terminal approx value of the state = 0
+            println([t, S[t], R[t], V[S[t]]])
+        elseif t == length(S)-1 # 2nd last index, only the st+2 is 0 (which is the terminal), but terminal has reward
+            V[S[t]] += (α*(R[t] + γ*R[t+1] - V[S[t]]))
+            println([t, S[t], R[t], V[S[t]]])
+        else
+            V[S[t]] += (α*(R[t] + γ*R[t+1] + γ^2*V[S[t+2]] - V[S[t]])) # observed reward + observed reward of next state + approx reward of 2 next state 
+            println([t, S[t], R[t], R[t+1], V[S[t]], V[S[t+2]]])
+        end
+    end
+    return V
+end
+
 
 
 
@@ -106,5 +127,8 @@ function main()
     S = [1,2,1,1,2]
     A = [2,2,1,2,1]
     R = Vector{Float64}([0,1,1,0,2])
-    TD(["A", "B"],S, R, γ, α)
+    #Vs = TD(["A", "B"],S, R, γ, α)
+    println("v(s) from TD(0) is ",Vs)
+    Vs = TD2(["A", "B"],S, R, γ, α)
+    println("v(s) from TD(2) is ",Vs)
 end
