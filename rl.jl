@@ -3,11 +3,11 @@ every-visit MC algo (pg.19 Lecture 3: Value-based methods slide ),
 simpler than first-visit MC.
 params:
     - states, unique states
-    - S, s0, s1,...
+    - S, s0, s1,... visited states
     - R, a "matrix" of transition rewards ∈ Float64
     - γ, discount factor ∈ (0,1)
 returns:
-    - similar(S)
+    - similar(staes)
 """
 function evmc(states, S, R, γ)
     n = zeros(Int, length(states)) # n_ts[i] := counter of visiting state i
@@ -60,7 +60,7 @@ function TD0(states, S, R, γ, α)
     V = zeros(length(states)) # output
     for t ∈ eachindex(S)
         if t == length(S) # last index
-            V[S[t]] += (α*(R[t] - V[S[t]]))  # terminal reward = 0
+            V[S[t]] += (α*(R[t] - V[S[t]]))  # terminal valuefun = 0
             println([t, S[t], R[t], V[S[t]],])
         else
             V[S[t]] += (α*(R[t] + γ*V[S[t+1]] - V[S[t]]))
@@ -79,7 +79,7 @@ function TD2(states, S, R, γ, α)
         if t == length(S) # last index
             V[S[t]] += (α*(R[t] - V[S[t]]))  # terminal approx value of the state = 0
             println([t, S[t], R[t], V[S[t]]])
-        elseif t == length(S)-1 # 2nd last index, only the st+2 is 0 (which is the terminal), but terminal has reward
+        elseif t == length(S)-1 # 2nd last index, only the V_s_t+2 is 0 (which is the terminal), but terminal has reward: r_t+2 > 0
             V[S[t]] += (α*(R[t] + γ*R[t+1] - V[S[t]]))
             println([t, S[t], R[t], V[S[t]]])
         else
@@ -90,6 +90,52 @@ function TD2(states, S, R, γ, α)
     return V
 end
 
+"""
+approx Q(s,a) by information of (S)_t, (A)_t, (R)_t+1, (S)_t+1, (A)_t+1, ⟹ SARSA
+
+*** this only assumes one episode ****
+params:
+    - A: a0, a1,... episodic actions
+    ...
+"""
+function SARSA(states, acts, S, A, R, γ, α)
+    Q = zeros(length(states), length(acts)) # is a matrix instead of a vector like V
+    for t ∈ eachindex(S)
+        if t == length(S) # similar story to TD
+            Q[S[t], A[t]] += ( α*(R[t] - Q[S[t], A[t]]) )
+            println([Int(t), Int(S[t]), Int(A[t]), R[t], Q[S[t], A[t]]])
+        else
+            Q[S[t], A[t]] += ( α*(R[t] + γ*Q[S[t+1], A[t+1]] - Q[S[t], A[t]]) ) # predetermined policy returns A[t]
+            println([Int(t), Int(S[t]), Int(A[t]), R[t], Q[S[t], A[t]], Q[S[t+1], A[t+1]]])
+        end
+    end
+    return Q
+end
+
+"""
+similar to SARSA but off policy ⟹ update the Q value by the max Q(⋅,a)
+"""
+function Qlearn(states, acts, S, A, R, γ, α)
+    Q = zeros(length(states), length(acts)) # is a matrix instead of a vector like V
+    acts = Vector{Int}(eachindex(acts)) # just in case if acts is a vector of string, reencode here
+    for t ∈ eachindex(S)
+        if t == length(S) # = SARSA since max_a Q(terminal,a) = 0 anyways
+            Q[S[t], A[t]] += ( α*(R[t] - Q[S[t], A[t]]) )
+            println([Int(t), Int(S[t]), Int(A[t]), R[t], Q[S[t], A[t]]])
+        else # update by max_a Q(s_t+1,a)
+            # findmax:
+            Qmax = -Inf
+            for i ∈ eachindex(acts)
+                if Q[S[t+1], acts[i]] > Qmax
+                    Qmax = Q[S[t+1], acts[i]]
+                end
+            end
+            Q[S[t], A[t]] += ( α*(R[t] + γ*Qmax - Q[S[t], A[t]]) ) 
+            println([Int(t), Int(S[t]), Int(A[t]), R[t], Q[S[t], A[t]], Qmax])
+        end
+    end
+    return Q
+end
 
 
 
@@ -125,10 +171,13 @@ function main()
 
     # 1b: [A, B, A, A, B, T]
     S = [1,2,1,1,2]
-    A = [2,2,1,2,1]
+    A = [2,2,1,2,1] # actions matter for SARSA and Q-learning
     R = Vector{Float64}([0,1,1,0,2])
-    #Vs = TD(["A", "B"],S, R, γ, α)
-    println("v(s) from TD(0) is ",Vs)
-    Vs = TD2(["A", "B"],S, R, γ, α)
-    println("v(s) from TD(2) is ",Vs)
+    V = TD(["A", "B"],S, R, γ, α)
+    println("v(s) from TD(0) is ",V)
+    V = TD2(["A", "B"],S, R, γ, α)
+    println("v(s) from TD(2) is ",V)
+    Q = SARSA(["A", "B"], ["stay", "switch"],S, A, R, γ, α)
+    display(Q)
+    
 end
