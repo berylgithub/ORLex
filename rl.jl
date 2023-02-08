@@ -177,7 +177,8 @@ function main()
     println("v(s) from TD(0) is ",V)
     V = TD2(["A", "B"],S, R, γ, α)
     println("v(s) from TD(2) is ",V)
-    Q = SARSA(["A", "B"], ["stay", "switch"],S, A, R, γ, α)
+    Q = SARSA(["A", "B"], ["stay", "switch"], S, A, R, γ, α)
     display(Q)
-    
+    Q = Qlearn(["A", "B"], ["stay", "switch"], S, A, R, γ, α)
+    display(Q)
 end
