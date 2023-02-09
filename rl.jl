@@ -173,7 +173,7 @@ function main()
     S = [1,2,1,1,2]
     A = [2,2,1,2,1] # actions matter for SARSA and Q-learning
     R = Vector{Float64}([0,1,1,0,2])
-    V = TD(["A", "B"],S, R, γ, α)
+    V = TD0(["A", "B"],S, R, γ, α)
     println("v(s) from TD(0) is ",V)
     V = TD2(["A", "B"],S, R, γ, α)
     println("v(s) from TD(2) is ",V)

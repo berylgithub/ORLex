@@ -1,0 +1,155 @@
+\documentclass[12pt]{article}
+
+% Language setting
+% Replace `english' with e.g. `spanish' to change the document language
+\usepackage[english]{babel}
+
+% Set page size and margins
+% Replace `letterpaper' with `a4paper' for UK/EU standard size
+\usepackage[a4paper,top=2cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
+
+% Useful packages
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{mathtools}
+\usepackage{enumitem}
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
+\usepackage[colorlinks=true, allcolors=blue]{hyperref}
+
+
+%macros
+\newcommand{\defeq}[2]{\stackrel{\mathclap{\normalfont\mbox{#1}}}{#2}}
+\def\D{\displaystyle}
+\def\att{                    % mark at the margin
+        \marginpar[ \hspace*{\fill} \raisebox{-0.2em}{\rule{2mm}{1.2em}} ]
+        {\raisebox{-0.2em}{\rule{2mm}{1.2em}} }
+        }
+\def\at#1{[*** \att #1 ***]}  % text needing attention
+\def\spc{\hspace*{0.5cm}}
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+
+\title{2022W 510009-1 VGSCO: \\ Optimization Foundations of Reinforcement Learning}
+\author{Beryl Ramadhian Aribowo}
+
+\begin{document}
+\maketitle
+\section*{Assignment 1}
+\subsection*{1.}
+Let $\pi_0$ be a policy which always switches states.
+For example, if we start from $A$, then the sequence of the visited states will be $A,B,A,B,A....$
+\subsubsection*{a)}
+The value function is defined by
+\begin{equation}
+    \begin{split}
+        V^{\pi_0}(s) &= \mathbb{E}\Big[\sum^\infty_{t=0}\gamma^tr(s_t,a_t)|s_0=s, \pi_0\Big].
+    \end{split}
+    \label{eq:valuefun}
+\end{equation}
+For state $A$:
+\begin{equation*}
+    V^{\pi_0}(A) = 0 + \gamma + 0 + \gamma^3 + ... = \frac{\gamma}{1-\gamma^2}.
+\end{equation*}
+For state $B$:
+\begin{equation*}
+    V^{\pi_0}(B) = 1 + 0 + \gamma^2 + 0 + ... = \frac{1}{1-\gamma^2}.
+\end{equation*}
+Therefore
+\begin{equation}
+    \mathbf{V}^{\pi_0} := \Big[\frac{\gamma}{1-\gamma^2}, \frac{1}{1-\gamma^2}\Big]^\top.
+    \label{eq:vpi0}
+\end{equation}
+\subsubsection*{b)}
+By observation, the optimal policy $\pi^*$ is
+\begin{equation*}
+    \begin{split}
+        &s_t=A \rightarrow \pi^*(s_t) = \text{stay}, \\
+        &s_t=B \rightarrow \pi^*(s_t) = \text{switch} ,
+    \end{split}    
+\end{equation*}
+Using (\ref{eq:valuefun}), the value functions by following $\pi^*$ are
+\begin{equation*}
+    \begin{split}
+        V^{\pi^*}(A) &= 1 + \gamma + \gamma^2 + ... = \frac{1}{1-\gamma} ,\\
+        V^{\pi^*}(B) &= 1 + \gamma + \gamma^2 + ... = \frac{1}{1-\gamma}.
+    \end{split}
+\end{equation*}
+\subsubsection*{c)}
+Bellman optimality operator is
+\begin{equation*}
+    \mathcal{T}V(s) := \max_{a \in \mathcal{A}} \Big[r(s,a) + \gamma\sum_{s'\in S}P(s'|s,a)V(s')\Big].
+\end{equation*}
+Given $\mathbf{V}^{\pi_0}$ from (\refeq{eq:vpi0}), then
+\begin{equation}
+    \begin{split}
+        \mathcal{T}V^{\pi_0}(A) &= \max_{a \in \mathcal{A}} \Big[r(A,a) + \gamma P(A|A,a)V^{\pi_0}(A) + \gamma P(B|A,a)V^{\pi_0}(B) \Big] \\
+        &= \max \Big[r(A,\text{stay}) + \gamma P(A|A,\text{stay})V^{\pi_0}(A) + \gamma P(B|A,\text{stay})V^{\pi_0}(B), \\ &r(A,\text{switch}) + \gamma P(A|A,\text{switch})V^{\pi_0}(A) + \gamma P(B|A,\text{switch})V^{\pi_0}(B)\Big] \\
+        &= \max \Big[1 + \frac{\gamma^2}{1-\gamma^2} + 0, 0 + 0 + \frac{\gamma}{1-\gamma^2}\Big] \\
+        &= \max \Big[\frac{1}{1-\gamma^2}, \frac{\gamma}{1-\gamma^2}\Big] \\
+        &= \frac{1}{1-\gamma^2}, \\
+        \mathcal{T}V^{\pi_0}(B) &= \max_{a \in \mathcal{A}} \Big[r(B,a) + \gamma P(A|B,a)V^{\pi_0}(A) + \gamma P(B|B,a)V^{\pi_0}(B) \Big] \\
+        &= \dots \\
+        &= \max \Big[\frac{\gamma}{1-\gamma^2}, \frac{1}{1-\gamma^2}\Big] \\
+        &= \frac{1}{1-\gamma^2}.
+    \end{split}
+    \label{eq:bellmanop}
+\end{equation}
+\subsubsection*{d)}
+The greedy policy of a state $s$ is defined by
+\begin{equation*}
+    \pi_{t+1}(s) = \argmax_{a\in\mathcal{A}}\Big[r(s,a) + \gamma \sum_{s'\in S} P(s'|s,a)V^{\pi_t}(s') \Big].
+\end{equation*}
+By the results of (\refeq{eq:bellmanop}) we can infer that the greedy policy given $\mathbf{V}^{\pi_0}$ is
+\begin{equation*}
+    \begin{split}
+        \pi_1(A) &= \text{stay}, \\
+        \pi_1(B) &= \text{switch}.
+    \end{split}
+\end{equation*}
+\subsubsection*{e)}
+Value iteration for each time step $t$ is defined by
+\begin{equation*}
+    \mathbf{V}_{t+1} = \mathcal{T}\mathbf{V}_t.
+\end{equation*}
+From (\refeq{eq:bellmanop}) we computed value iteration once given $\mathbf{V}^{\pi_0}$, and we can see that
+\begin{equation*}
+    \mathcal{T}V^{\pi_0}(A) = \mathcal{T}V^{\pi_0}(B) = V_1(A) = V_1(B) = \frac{1}{1-\gamma^2},
+\end{equation*}
+therefore we only need to do value iteration either for state $A$ or $B$, for 4 more times,
+\begin{equation}
+    \begin{split}
+        V_2(A)&= \max \Big[1 + \gamma\Big(\frac{1}{1-\gamma^2}\Big), \frac{\gamma}{1-\gamma^2}\Big] = \frac{1+\gamma-\gamma^2}{1-\gamma^2}, \\
+        V_3(A)&=\max \Big[1 + \gamma\Big(\frac{1+\gamma-\gamma^2}{1-\gamma^2}\Big), \frac{1+\gamma-\gamma^2}{1-\gamma^2}\Big] = \frac{1+\gamma-\gamma^3}{1-\gamma^2}, \\
+        \dots \\
+        V_5(A)&=V_5(B) = \frac{1+\gamma-\gamma^5}{1-\gamma^2}.
+    \end{split}
+    \label{eq:valiter}
+\end{equation}
+\subsubsection*{f)}
+In policy iteration, for each time step $t$, we either compute value iteration until convergence or
+\begin{equation}
+    \mathbf{V}^{\pi_t} = (\mathbf{I}-\gamma\mathbf{P}^{\pi_t})^{-1}\mathbf{R}^{\pi_t},
+\end{equation}
+then update the policy $\pi_{t+1}$ by greedy policy.
+From (\refeq{eq:valiter}), given an infinite number of iterations, the value iteration gives
+\begin{equation}
+    \begin{split}
+        V^*(A) &= V^*(B) =\frac{1 + \gamma -\gamma^\infty}{1-\gamma^2} \\
+        &= \frac{1+\gamma}{1-\gamma^2} - \underbrace{\frac{\gamma^\infty}{1-\gamma^2}}_{\approx 0} \\
+        &= \frac{1+\gamma}{1-\gamma^2}.
+    \end{split}
+    \label{eq:valiterinfinite}
+\end{equation}
+then we do a greedy policy, by using (\refeq{eq:bellmanop}) and (\refeq{eq:valiterinfinite})
+\begin{equation}
+    \begin{split}
+        \pi_{t+1}(A) &= \argmax \Big[1+\gamma( \frac{1+\gamma}{1-\gamma^2}),  \frac{1+\gamma}{1-\gamma^2}\Big] \\
+        &= \argmax \Big[1+\gamma( \frac{1+\gamma}{1-\gamma^2}),  \frac{1+\gamma}{1-\gamma^2}\Big]
+    \end{split}
+\end{equation}
+\end{document}
