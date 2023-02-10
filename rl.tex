@@ -40,7 +40,7 @@
 \begin{document}
 \maketitle
 \section*{Assignment 1}
-\subsection*{1.}
+\subsection*{1. Basic concepts}
 Let $\pi_0$ be a policy which always switches states.
 For example, if we start from $A$, then the sequence of the visited states will be $A,B,A,B,A....$
 \subsubsection*{a)}
@@ -136,20 +136,57 @@ In policy iteration, for each time step $t$, we either compute value iteration u
     \mathbf{V}^{\pi_t} = (\mathbf{I}-\gamma\mathbf{P}^{\pi_t})^{-1}\mathbf{R}^{\pi_t},
 \end{equation}
 then update the policy $\pi_{t+1}$ by greedy policy.
-From (\refeq{eq:valiter}), given an infinite number of iterations, the value iteration gives
+Let us proceed by using the value iteration. From (\refeq{eq:valiter}), given an infinite number of iterations, the value iteration gives
 \begin{equation}
     \begin{split}
         V^*(A) &= V^*(B) =\frac{1 + \gamma -\gamma^\infty}{1-\gamma^2} \\
         &= \frac{1+\gamma}{1-\gamma^2} - \underbrace{\frac{\gamma^\infty}{1-\gamma^2}}_{\approx 0} \\
-        &= \frac{1+\gamma}{1-\gamma^2}.
+        &= \frac{1+\gamma}{1-\gamma^2},
     \end{split}
     \label{eq:valiterinfinite}
 \end{equation}
-then we do a greedy policy, by using (\refeq{eq:bellmanop}) and (\refeq{eq:valiterinfinite})
+then we do a greedy policy, similarly to (\refeq{eq:bellmanop}) and by using (\refeq{eq:valiterinfinite}) we obtain
 \begin{equation}
     \begin{split}
         \pi_{t+1}(A) &= \argmax \Big[1+\gamma( \frac{1+\gamma}{1-\gamma^2}),  \frac{1+\gamma}{1-\gamma^2}\Big] \\
-        &= \argmax \Big[1+\gamma( \frac{1+\gamma}{1-\gamma^2}),  \frac{1+\gamma}{1-\gamma^2}\Big]
+        &= \text{stay} \\
+        \pi_{t+1}(B) &= \argmax \Big[\frac{1+\gamma}{1-\gamma^2}, 1+\gamma( \frac{1+\gamma}{1-\gamma^2})\Big] \\
+        &= \text{switch}
     \end{split}
+    \label{eq:policyiter}
 \end{equation}
+for $t=2,..,5$, the value functions are already converged, with the same values as in (\refeq{eq:valiterinfinite}) which also give the same policy as in (\refeq{eq:policyiter}).
+
+\subsection*{2. Bounding suboptimality via Bellman error}
+\subsubsection*{a)}
+Bellman optimality operator for state-action value function can be defined in a similar way to the Bellman optimality operator for state value function. Bellman optimality operator for state-action value function is
+\begin{equation}
+    \mathcal{T}_QQ(s,a) = r(s,a) + \gamma\Big[\sum_{s'\in S}P(s'|s,a) \Big(\max_{a' \in \mathcal{A}}Q(s',a')\Big)\Big].
+\end{equation}
+From the lecture note, we have the relation between $Q$ and $V$ following policy $\pi$ as
+\begin{equation}
+    V^\pi(s) = \sum_{a \in \mathcal{A}}\pi(a|s)Q^\pi(s,a), 
+    \label{eq:qvrelation}
+\end{equation}
+and from the lecture we have a bellman expectation operator for state value function
+\begin{equation}
+    V^\pi(s) = \mathcal{T}^\pi V^\pi(s) := \sum_{a \in \mathcal{A}} \pi(a|s) \Big[r(s,a) + \gamma \sum_{s'\in S}P(s'|s,a)V^\pi(s') \Big].
+    \label{eq:vpi}
+\end{equation}
+Given $Q^\pi$:
+\begin{equation}
+    Q^\pi(s,a) = r(s,a) + \gamma\sum_{s'\in S}P(s'|s,a)V^\pi(s'),
+    \label{eq:qfun}
+\end{equation}
+and by using (\refeq{eq:qvrelation}) we can define the bellman expectation operator for state-action value function similarly to (\refeq{eq:vpi}),
+\begin{equation}
+    \mathcal{T}^\pi_QQ(s,a) = r(s,a) + \gamma \sum_{s'\in S}P(s'|s,a)\sum_{a' \in \mathcal{A}}\pi(a'|s')Q(s',a').
+    \label{eq:qbellmanexpect}
+\end{equation}
+
+
+\subsubsection*{b)}
+\subsubsection*{c)}
+\subsubsection*{d)}
+
 \end{document}
