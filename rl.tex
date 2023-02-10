@@ -225,7 +225,7 @@ therefore
 \begin{equation*}
     \Big|\mathcal{T}_Q\mathbf{Q}(s,a)-\mathcal{T}_Q\mathbf{Q}(s,a)'\Big| \leq \gamma \|\mathbf{Q} - \mathbf{Q'}\|_\infty.
 \end{equation*}
-$\mathcal{T}^\pi_Q$ is also a $\gamma$ contraction under $l_\infty$-norm, by a similar manner to $\mathcal{T}Q$:
+$\mathcal{T}^\pi_Q$ is also a $\gamma$ contraction under $l_\infty$-norm, by a similar manner to $\mathcal{T}_Q$:
 \begin{equation}
     \begin{split}
         \Big|\mathcal{T}^\pi_Q\mathbf{Q}(s,a)-\mathcal{T}^\pi_Q\mathbf{Q}(s,a)'\Big| &= \Big|\gamma \sum_{s'\in S}P(s'|s,a)\sum_{a'\in \mathcal{A}}\pi(a'|s')\Big(\mathbf{Q}(s',a')-\mathbf{Q}'(s',a')\Big)\Big| \\
@@ -233,8 +233,58 @@ $\mathcal{T}^\pi_Q$ is also a $\gamma$ contraction under $l_\infty$-norm, by a s
         &\leq \gamma \|\mathbf{Q} - \mathbf{Q'}\|_\infty.
     \end{split}
 \end{equation}
-
 \subsubsection*{c)}
-\subsubsection*{d)}
+For any state-action value function $\mathbf{Q}$:
+\begin{equation}
+    \|\mathbf{Q} - \mathbf{Q}^*\|_\infty \leq \frac{\|\mathbf{Q} - \mathcal{T}_Q\mathbf{Q}\|_\infty}{1-\gamma}.
+    \label{eq:2cproblem}
+\end{equation}
+We can use the fixed point definition:
+\begin{equation}
+    \mathbf{Q}^* = \mathcal{T}_Q\mathbf{Q}^*,
+\end{equation}
+and the result of \textbf{2.b)} to prove (\refeq{eq:2cproblem}): 
+\begin{equation*}
+    \begin{split}
+        \|\mathbf{Q} - \mathbf{Q}^*\|_\infty &= \|\mathbf{Q} - \mathcal{T}_Q\mathbf{Q} + \mathcal{T}_Q\mathbf{Q} -\mathcal{T}_Q\mathbf{Q}^*\|_\infty \\
+        &\leq \|\mathbf{Q} - \mathcal{T}_Q\mathbf{Q}\|_\infty + \|\mathcal{T}_Q\mathbf{Q} -\mathcal{T}_Q\mathbf{Q}^*\|_\infty \\
+        &\leq \|\mathbf{Q} - \mathcal{T}_Q\mathbf{Q}\|_\infty + \gamma \|\mathbf{Q} - \mathbf{Q}^*\|_\infty.
+    \end{split}
+\end{equation*}
 
+\subsubsection*{d)}
+Let $\pi$ be a greedy policy with respect to $Q$,
+\begin{equation}
+    \pi = \argmax_a Q(\cdot, a),
+\end{equation}
+value function $V^\pi$ for this policy satisfies
+\begin{equation}
+    \|\mathbf{V}^\pi - \mathbf{V}^*\|_\infty \leq \frac{2\|\mathbf{Q}-\mathcal{T}_Q\mathbf{Q}\|_\infty}{1-\gamma}.
+    \label{eq:2dquest}
+\end{equation}
+We can rewrite the definition of $V^\pi$ in (\refeq{eq:vpi}) in terms of $Q^\pi$
+\begin{equation}
+    V^\pi(s) = \sum_{a \in \mathcal{A}} \pi(a|s) Q^\pi(s,a).
+    \label{eq:vpiinq}
+\end{equation}
+Next, $V^*$ in terms of $Q^*$ is
+\begin{equation}
+    V^*(s) = \max_{a\in \mathcal{A}}Q^*(s,a).
+    \label{eq:vstar}
+\end{equation}
+We expand LHS of (\refeq{eq:2dquest}) by using (\refeq{eq:vpiinq}) and (\refeq{eq:vstar})
+\begin{equation*}
+    \begin{split}
+        \|\mathbf{V}^\pi - \mathbf{V}^*\|_\infty &= \|\sum_{a \in \mathcal{A}} \pi(a|s) \mathbf{Q}^\pi(s,a) - \max_{a\in A}\mathbf{Q}^*(s,a)\|_\infty \\
+        &\leq \|\max_{a\in \mathcal{A}}\mathbf{Q}(s,a) - \max_{a\in A}\mathbf{Q}^*(s,a)\|_\infty \\
+        &\leq 2\|\max_{a\in \mathcal{A}}\mathbf{Q}(s,a) - \max_{a\in A}\mathbf{Q}^*(s,a)\|_\infty,
+    \end{split}
+\end{equation*}
+then by using (\refeq{eq:qboundinfnorm}) and (\refeq{eq:2cproblem})
+\begin{equation*}
+    \begin{split}
+        2\|\max_{a\in \mathcal{A}}\mathbf{Q}(s,a) - \max_{a\in A}\mathbf{Q}^*(s,a)\|_\infty &\leq 2 \|\mathbf{Q}-\mathbf{Q}^*\|_\infty \\
+        &\leq \frac{2\|\mathbf{Q} - \mathcal{T}_Q\mathbf{Q}\|_\infty}{1-\gamma}.
+    \end{split}
+\end{equation*}
 \end{document}
