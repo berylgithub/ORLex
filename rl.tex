@@ -183,9 +183,23 @@ and by using (\refeq{eq:qvrelation}) we can define the bellman expectation opera
     \mathcal{T}^\pi_QQ(s,a) = r(s,a) + \gamma \sum_{s'\in S}P(s'|s,a)\sum_{a' \in \mathcal{A}}\pi(a'|s')Q(s',a').
     \label{eq:qbellmanexpect}
 \end{equation}
-
-
 \subsubsection*{b)}
+Given any state action value functions
+\begin{equation}
+    \Big|\max_{a \in \mathcal{A}}\mathbf{Q}(s,a) - \max_{a \in \mathcal{A}}\mathbf{Q'}(s,a)\Big| \leq \|\mathbf{Q}-\mathbf{Q'}\|_{\infty} \quad \forall s\in S.
+\end{equation}
+This can be shown by \at{expanding RHS}
+
+Both operators (expectration and optimality) are $\gamma$ contraction under $l_\infty$-norm.
+Show:
+\begin{equation}
+    \|\mathcal{T}_Q\mathbf{Q}-\mathcal{T}_Q\mathbf{Q}'\|_\infty \leq \gamma \|\mathbf{Q}-\mathbf{Q'}\|_\infty.
+\end{equation}
+Show:
+\begin{equation}
+    \|\mathcal{T}^\pi_Q\mathbf{Q}-\mathcal{T}^\pi_Q\mathbf{Q}'\|_\infty \leq \gamma \|\mathbf{Q}-\mathbf{Q'}\|_\infty.
+\end{equation}
+
 \subsubsection*{c)}
 \subsubsection*{d)}
 
