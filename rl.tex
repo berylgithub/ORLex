@@ -162,6 +162,7 @@ for $t=2,..,5$, the value functions are already converged, with the same values 
 Bellman optimality operator for state-action value function can be defined in a similar way to the Bellman optimality operator for state value function. Bellman optimality operator for state-action value function is
 \begin{equation}
     \mathcal{T}_QQ(s,a) = r(s,a) + \gamma\Big[\sum_{s'\in S}P(s'|s,a) \Big(\max_{a' \in \mathcal{A}}Q(s',a')\Big)\Big].
+    \label{eq:bellmanoptimalityop}
 \end{equation}
 From the lecture note, we have the relation between $Q$ and $V$ following policy $\pi$ as
 \begin{equation}
@@ -187,17 +188,50 @@ and by using (\refeq{eq:qvrelation}) we can define the bellman expectation opera
 Given any state action value functions
 \begin{equation}
     \Big|\max_{a \in \mathcal{A}}\mathbf{Q}(s,a) - \max_{a \in \mathcal{A}}\mathbf{Q'}(s,a)\Big| \leq \|\mathbf{Q}-\mathbf{Q'}\|_{\infty} \quad \forall s\in S.
+    \label{eq:qboundinfnorm}
 \end{equation}
-This can be shown by \at{expanding RHS}
-
-Both operators (expectration and optimality) are $\gamma$ contraction under $l_\infty$-norm.
-Show:
+This can be shown by expanding the RHS:
+\begin{equation*}
+    \begin{split}
+        \|\mathbf{Q}-\mathbf{Q'}\|_{\infty} &= \max_{a \in \mathcal{A}}\sum_{s\in S} \Big|\mathbf{Q}_{as} - \mathbf{Q}'_{as}\Big| \\
+        &\geq \sum_{s\in S} \left|\max_{a \in \mathcal{A}} \mathbf{Q}_{as} - \max_{a \in \mathcal{A}} \mathbf{Q}'_{as}\right|,
+    \end{split}
+\end{equation*}
+hence
+\begin{equation*}
+    \begin{split}
+        \Big|\max_{a \in \mathcal{A}}\mathbf{Q}(s,a) - \max_{a \in \mathcal{A}}\mathbf{Q'}(s,a)\Big| \leq \sum_{s\in S} \left|\max_{a \in \mathcal{A}} \mathbf{Q}_{as} - \max_{a \in \mathcal{A}} \mathbf{Q}'_{as}\right| \leq \|\mathbf{Q}-\mathbf{Q'}\|_{\infty} ~~ \forall s \in S.
+    \end{split}
+\end{equation*}
+$\mathcal{T}_Q$ is $\gamma$ contraction under $l_\infty$-norm, formally
 \begin{equation}
-    \|\mathcal{T}_Q\mathbf{Q}-\mathcal{T}_Q\mathbf{Q}'\|_\infty \leq \gamma \|\mathbf{Q}-\mathbf{Q'}\|_\infty.
+    \|\mathcal{T}_Q\mathbf{Q}-\mathcal{T}_Q\mathbf{Q}'\|_\infty \leq \gamma \|\mathbf{Q}-\mathbf{Q'}\|_\infty,
 \end{equation}
-Show:
+it can be shown by taking the absolute difference of the operator applied on each $\mathbf{Q}'$ and $\mathbf{Q}$ by using (\refeq{eq:bellmanoptimalityop}),
+\begin{equation*}
+    \begin{split}
+        \Big|\mathcal{T}_Q\mathbf{Q}(s,a)-\mathcal{T}_Q\mathbf{Q}(s,a)'\Big| &= \Big|\gamma \sum_{s'\in S}P(s'|s,a)\Big(\max_{a' \in \mathcal{A}}\mathbf{Q}(s',a')-\max_{a' \in \mathcal{A}}\mathbf{Q}'(s',a')\Big)\Big| \\
+        &= \gamma \sum_{s'\in S}P(s'|s,a)\Big|\max_{a' \in \mathcal{A}}\mathbf{Q}(s',a')-\max_{a' \in \mathcal{A}}\mathbf{Q}'(s',a')\Big| \\
+        &\leq \gamma \sum_{s'\in S} \Big|\max_{a' \in \mathcal{A}}\mathbf{Q}(s',a')-\max_{a' \in \mathcal{A}}\mathbf{Q}'(s',a')\Big|, \\
+    \end{split}
+\end{equation*}
+then by (\refeq{eq:qboundinfnorm})
+\begin{equation*}
+    \begin{split}
+        \gamma \sum_{s'\in S}\Big|\max_{a' \in \mathcal{A}}\mathbf{Q}(s',a')-\max_{a' \in \mathcal{A}}\mathbf{Q}'(s',a')\Big| \leq \gamma \|\mathbf{Q} - \mathbf{Q'}\|_\infty,
+    \end{split}
+\end{equation*}
+therefore
+\begin{equation*}
+    \Big|\mathcal{T}_Q\mathbf{Q}(s,a)-\mathcal{T}_Q\mathbf{Q}(s,a)'\Big| \leq \gamma \|\mathbf{Q} - \mathbf{Q'}\|_\infty.
+\end{equation*}
+$\mathcal{T}^\pi_Q$ is also a $\gamma$ contraction under $l_\infty$-norm, by a similar manner to $\mathcal{T}Q$:
 \begin{equation}
-    \|\mathcal{T}^\pi_Q\mathbf{Q}-\mathcal{T}^\pi_Q\mathbf{Q}'\|_\infty \leq \gamma \|\mathbf{Q}-\mathbf{Q'}\|_\infty.
+    \begin{split}
+        \Big|\mathcal{T}^\pi_Q\mathbf{Q}(s,a)-\mathcal{T}^\pi_Q\mathbf{Q}(s,a)'\Big| &= \Big|\gamma \sum_{s'\in S}P(s'|s,a)\sum_{a'\in \mathcal{A}}\pi(a'|s')\Big(\mathbf{Q}(s',a')-\mathbf{Q}'(s',a')\Big)\Big| \\
+        &= \gamma \sum_{s'\in S}P(s'|s,a)\sum_{a'\in \mathcal{A}}\pi(a'|s')\Big|\mathbf{Q}(s',a')-\mathbf{Q}'(s',a')\Big| \\
+        &\leq \gamma \|\mathbf{Q} - \mathbf{Q'}\|_\infty.
+    \end{split}
 \end{equation}
 
 \subsubsection*{c)}
