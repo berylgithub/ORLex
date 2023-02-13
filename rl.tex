@@ -287,4 +287,27 @@ then by using (\refeq{eq:qboundinfnorm}) and (\refeq{eq:2cproblem})
         &\leq \frac{2\|\mathbf{Q} - \mathcal{T}_Q\mathbf{Q}\|_\infty}{1-\gamma}.
     \end{split}
 \end{equation*}
+
+\section*{Assignment 2}
+\subsection*{1. Monte Carlo and TD learning}
+\subsection*{2. Control with $\epsilon$-greedy policy}
+\subsubsection*{a)}
+Given an $\epsilon$-soft policy algorithm, show:
+\begin{equation}
+	Q^{\pi_t}(s,\pi_{t+1}(s)) \geq V^{\pi_t}(s).
+\end{equation}
+To show this, we expand the LHS, $\forall s$:
+\begin{equation}
+	\begin{split}
+		Q^{\pi_t}(s,\pi_{t+1}(s)) &= \mathbb{E}_{a\sim\pi'(s,a)}[Q^{\pi_{t}}(s,a)] \\
+		&= \sum_{a \in \mathcal{A}} P^{\pi_{t+1}}(a|s)Q^{\pi_{t}}(s,a) \\
+		&= P(a^*|s)Q^{\pi_{t}}(s,a^*) + \sum_{a \neq a^*}P(a|s)Q^{\pi_{t}}(s,a) \\
+		&=\Big(1-\epsilon+\frac{\epsilon}{|\mathcal{A}|}\Big)Q^{\pi_{t}}(s,a^*) + \Big(\epsilon - \frac{\epsilon}{|\mathcal{A}|}\Big)Q^{\pi_{t}}(s,a) \\
+		&\geq V^{\pi_t}(s).
+	\end{split}
+\end{equation}
+\subsubsection*{b)}
+
+
+\subsection*{4. Policy optimization under different parameterization}
 \end{document}
