@@ -18,7 +18,8 @@
 \usepackage{algorithmicx}
 \usepackage{algpseudocode}
 \usepackage[colorlinks=true, allcolors=blue]{hyperref}
-
+\usepackage{jlcode}
+\usepackage[toc,page]{appendix}
 
 %macros
 \newcommand{\defeq}[2]{\stackrel{\mathclap{\normalfont\mbox{#1}}}{#2}}
@@ -308,9 +309,108 @@ where an additional error term could be induced each time the Bellman operators 
 
 \section*{Assignment 2}
 \subsection*{1. Monte Carlo and TD learning}
+For this exercise, all of the algorithms are implemented in Julia programming language, the complete code is attached in the Appendix (also available in my github repository: \url{https://github.com/berylgithub/ORLex/blob/main/rl.jl}).
+
+Given an MDP $\mathcal{M} = (\mathcal{S}, \mathcal{A}, \mathcal{P}, r,\mu, \gamma)$ with
+\begin{equation*}
+    \begin{split}
+        &\mathcal{S} = \{A,B,T\}, ~~ \mathcal{A} = \{\text{switch},\text{stay}\}, \\
+        &r(A, \text{switch})=0, ~~ r(A, \text{stay})=1, ~~ r(B, \text{switch})=1, ~~ r(B, \text{stay})=2, \\
+        &P(B|A, \text{switch})=1, ~~ P(A|A, \text{stay})=1, ~~P(A|B, \text{switch})=1, ~~P(T|B, \text{stay})=1.
+    \end{split}
+\end{equation*}
+\subsubsection*{a)}
+Trajectories $[A,A,B,T], [A,B,A,B,T]$ and $[A,B,T]$ are sampled from policy $\pi$... \at{to be continued..}
+
+First visit MC:
+\begin{jllisting}
+    function fvmc(states, S, R, γ)
+        n = zeros(Int, length(states)) # n_ts[i] := counter of visiting state i
+        Vs = zeros(length(states)) # output
+        for i ∈ eachindex(S) # foreach episode
+            G = 0. # reset G foreach eps
+            # compute the return G backwards:
+            for t ∈ reverse(eachindex(S[i]))
+                G = γ*G + R[i][t] # discount G_{t+1}
+                # for first exit MC, check if S[t] is in S[1:t-1]:
+                if S[i][t] ∉ S[i][1:t-1]
+                    n[S[i][t]] += 1 # update counter
+                    Vs[S[i][t]] += G # update return of S_t
+                end
+            end
+        end
+        return Vs ./ n # average V(s) := V(s)/n(s)
+    end
+\end{jllisting}
+
+Every visit MC:
+\begin{jllisting}
+    function evmc(states, S, R, γ)
+        n = zeros(Int, length(states)) # n_ts[i] := counter of visiting state i
+        Vs = zeros(length(states)) # output
+        for i ∈ eachindex(S) # foreach episode
+            G = 0. # reset G foreach eps
+            # compute the return G backwards:
+            for t ∈ reverse(eachindex(S[i]))
+                G = γ*G + R[i][t] # discount G_{t+1}
+                n[S[i][t]] += 1 # update counter
+                Vs[S[i][t]] += G # update return of S_t
+            end
+        end
+        return Vs ./ n # average V(s) := V(s)/n(s)
+    end
+\end{jllisting}
+\subsubsection*{b)}
+TD0:
+\begin{jllisting}
+    function TD0(states, S, R, γ, α)
+        V = zeros(length(states)) # output
+        for t ∈ eachindex(S)
+            if t == length(S) # last index
+                V[S[t]] += (α*(R[t] - V[S[t]]))  # terminal valuefun = 0
+            else
+                V[S[t]] += (α*(R[t] + γ*V[S[t+1]] - V[S[t]]))
+            end
+            println([t, S[t], R[t], V[S[t]]])
+        end
+        return V
+    end
+\end{jllisting}
+TD2:
+\begin{jllisting}
+    function TD2(states, S, R, γ, α)
+        V = zeros(length(states)) # output
+        for t ∈ eachindex(S)
+            if t == length(S) # last index
+                V[S[t]] += (α*(R[t] - V[S[t]]))  # terminal approx value of the state = 0
+            elseif t == length(S)-1 # 2nd last index, only the V_s_t+2 is 0 (which is the terminal), but terminal has reward: r_t+2 > 0
+                V[S[t]] += (α*(R[t] + γ*R[t+1] - V[S[t]]))
+            else
+                V[S[t]] += (α*(R[t] + γ*R[t+1] + γ^2*V[S[t+2]] - V[S[t]])) # observed reward + observed reward of next state + approx reward of 2 next state 
+            end
+            println([t, S[t], R[t], V[S[t]]])
+        end
+        return V
+    end
+\end{jllisting}
+
+SARSA:
+\begin{jllisting}
+    function SARSA(states, acts, S, A, R, γ, α)
+        Q = zeros(length(states), length(acts)) # is a matrix instead of a vector like V
+        for t ∈ eachindex(S)
+            if t == length(S) # similar story to TD
+                Q[S[t], A[t]] += ( α*(R[t] - Q[S[t], A[t]]) )
+            else
+                Q[S[t], A[t]] += ( α*(R[t] + γ*Q[S[t+1], A[t+1]] - Q[S[t], A[t]]) ) # predetermined policy returns A[t]
+            end
+            println([Int(t), Int(S[t]), Int(A[t]), R[t], Q[S[t], A[t]]])
+        end
+        return Q
+    end
+\end{jllisting}
 
 \subsection*{2. Control with $\epsilon$-greedy policy}
-
 \subsubsection*{a)}
 Given an $\epsilon$-soft policy algorithm, show:
 \begin{equation}
@@ -344,9 +444,9 @@ from here, by using Bellman optimality equations, we can define analogously
 	\end{split}
 \end{equation}
 
-\subsubsection*{c)} (TBD)
+\subsubsection*{c)} \at{TBD}
 \subsection*{3. Alternative proof of policy gradient}
-
+\at{TBD}
 \subsection*{4. Policy optimization under different parameterization}
 Given the same Markov decision process as in \textbf{problem 1 of Assignment 1}:
 \subsubsection*{a)}
@@ -375,7 +475,7 @@ Then we simplify $V^{\pi(\boldsymbol\theta)}(A)$ using $V^{\pi(\boldsymbol\theta
         V^{\pi(\boldsymbol\theta)}(B) &= \frac{\theta_2}{(\gamma-1)(\gamma(\theta_1 - \theta_2)-1)}.
     \end{split}
 \end{equation*}
-We can test the concavity by checking whether each value function has negative-semidefinite Hessian matrix.
+The concavity can be tested by checking whether each value function has negative-semidefinite Hessian matrix.
 \subsubsection*{b)}
 Given a policy class:
 \begin{equation}
@@ -399,4 +499,10 @@ then
 \begin{equation*}
     V^{\pi(\boldsymbol\theta)}(A) = V^{\pi(\boldsymbol\theta)}(B) = \frac{\Big(\theta - \frac{1}{4}\Big)^2}{1-\gamma}.
 \end{equation*}
+
+\newpage
+\begin{appendices}
+    Julia code for \textbf{problem 1 of assignment 2}:
+    \jlinputlisting{rl.jl}
+\end{appendices}
 \end{document}

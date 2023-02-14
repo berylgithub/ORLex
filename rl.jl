@@ -7,7 +7,7 @@ params:
     - R, a "matrix" of transition rewards ∈ Float64
     - γ, discount factor ∈ (0,1)
 returns:
-    - similar(staes)
+    - similar(states)
 """
 function evmc(states, S, R, γ)
     n = zeros(Int, length(states)) # n_ts[i] := counter of visiting state i
@@ -91,7 +91,7 @@ function TD2(states, S, R, γ, α)
 end
 
 """
-approx Q(s,a) by information of (S)_t, (A)_t, (R)_t+1, (S)_t+1, (A)_t+1, ⟹ SARSA
+approx Q(s,a) by information of (S)_t, (A)_t, (R)_t+1, (S)_t+1, (A)_t+1, hence SARSA
 
 *** this only assumes one episode ****
 params:
@@ -113,7 +113,7 @@ function SARSA(states, acts, S, A, R, γ, α)
 end
 
 """
-similar to SARSA but off policy ⟹ update the Q value by the max Q(⋅,a)
+similar to SARSA but off policy hence update the Q value by the max Q(⋅,a)
 """
 function Qlearn(states, acts, S, A, R, γ, α)
     Q = zeros(length(states), length(acts)) # is a matrix instead of a vector like V
