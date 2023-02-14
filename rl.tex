@@ -323,7 +323,7 @@ To show this, we expand the LHS, $\forall s$:
 		&= \sum_{a \in \mathcal{A}} P^{\pi_{t+1}}(a|s)Q^{\pi_{t}}(s,a) \\
 		&= P(a^*|s)Q^{\pi_{t}}(s,a^*) + \sum_{a \neq a^*}P(a|s)Q^{\pi_{t}}(s,a) \\
 		&=\Big(1-\epsilon+\frac{\epsilon}{|\mathcal{A}|}\Big)Q^{\pi_{t}}(s,a^*) + \Big(\epsilon - \frac{\epsilon}{|\mathcal{A}|}\Big)Q^{\pi_{t}}(s,a) \\
-		&\geq V^{\pi_t}(s).
+		&\geq Q^{\pi_{t}}(s,a) \geq V^{\pi_t}(s).
 	\end{split}
 \end{equation}
 
@@ -340,12 +340,11 @@ from here, by using Bellman optimality equations, we can define analogously
 	\begin{split}
 		\tilde{V}^*(s) &= \max_{a \in \mathcal{A}} \Big[\tilde{r}(s,a) + \gamma \sum_{s'\in S} \tilde{P}(s'|s,a)\tilde{V}^*(s')\Big] \\
 		&= \max_{a \in \mathcal{A}} \Big[(1-\epsilon)r(s,a) +  \frac{\epsilon}{|\mathcal{A}|}\sum_{a' \in \mathcal{A}}r(s,a') + \gamma \sum_{s'\in S} \Big((1-\epsilon)P(s'|s,a) + \frac{\epsilon}{|\mathcal{A}|}\sum_{a' \in \mathcal{A}}P(s'|s,a')\Big)\Big] \\
-		&= \frac{\epsilon}{|\mathcal{A}|}\sum_{a' \in \mathcal{A}}r(s,a') + \frac{\gamma \epsilon}{|\mathcal{A}|}\sum_{s'\in S, a' \in \mathcal{A}}P(s'|s,a') + \max_{a \in \mathcal{A}} \Big[(1-\epsilon)r(s,a) + \sum_{s' \in S} (\gamma-\gamma\epsilon)P(s'|s,a')\Big],
+		&= \frac{\epsilon}{|\mathcal{A}|}\sum_{a' \in \mathcal{A}}r(s,a') + \frac{\gamma \epsilon}{|\mathcal{A}|}\sum_{s'\in S, a' \in \mathcal{A}}P(s'|s,a') + \max_{a \in \mathcal{A}} \Big[(1-\epsilon)r(s,a) + \sum_{s' \in S} (\gamma-\gamma\epsilon)P(s'|s,a')\Big].
 	\end{split}
 \end{equation}
 
-\at{unfinished}
-
+\subsubsection*{c)} (TBD)
 \subsection*{3. Alternative proof of policy gradient}
 
 \subsection*{4. Policy optimization under different parameterization}
@@ -353,7 +352,7 @@ Given the same Markov decision process as in \textbf{problem 1 of Assignment 1}:
 \subsubsection*{a)}
 a policy class parameterized by two parameters:
 \begin{equation*}
-    \pi(\text{stay}|A) = \theta_1, ~~ \pi(\text{stay}|A) = \theta_2, ~~ \theta_1, \theta_2 \in [0,1], ~~ \mathbf{\boldsymbol\theta} = (\theta_1, \theta_2),
+    \pi(\text{stay}|A) = \theta_1, ~~ \pi(\text{switch}|B) = \theta_2, ~~ \theta_1, \theta_2 \in [0,1], ~~ \mathbf{\boldsymbol\theta} = (\theta_1, \theta_2),
 \end{equation*}
 has the value function $V^{\pi(\boldsymbol\theta)}(A)$
 \begin{equation*}
@@ -376,5 +375,28 @@ Then we simplify $V^{\pi(\boldsymbol\theta)}(A)$ using $V^{\pi(\boldsymbol\theta
         V^{\pi(\boldsymbol\theta)}(B) &= \frac{\theta_2}{(\gamma-1)(\gamma(\theta_1 - \theta_2)-1)}.
     \end{split}
 \end{equation*}
-We can test the concavity by checking whether each value function has negative-semidefinite Hessian.
+We can test the concavity by checking whether each value function has negative-semidefinite Hessian matrix.
+\subsubsection*{b)}
+Given a policy class:
+\begin{equation}
+    \pi(\text{stay}|A) = \pi(\text{switch}|B) = \theta,
+\end{equation}
+hence
+\begin{equation*}
+    \theta_1 = \theta_2 = \theta,
+\end{equation*}
+setting both $\theta_1 = \theta$ and $\theta_2 = \theta$, we have
+\begin{equation*}
+    V^{\pi(\boldsymbol\theta)}(A) = V^{\pi(\boldsymbol\theta)}(B) = \frac{\theta}{1-\gamma}.
+\end{equation*}
+It is clear that both value functions are linear, which imply the concavity.
+\subsubsection*{c)}
+Similarly to \textbf{2.b)}, given
+\begin{equation*}
+    \pi(\text{stay}|A) = \pi(\text{switch}|B) = \Big(\theta - \frac{1}{4}\Big)^2, ~~ \theta \in [0, 5/4],
+\end{equation*}
+then
+\begin{equation*}
+    V^{\pi(\boldsymbol\theta)}(A) = V^{\pi(\boldsymbol\theta)}(B) = \frac{\Big(\theta - \frac{1}{4}\Big)^2}{1-\gamma}.
+\end{equation*}
 \end{document}
