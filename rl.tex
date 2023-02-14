@@ -287,6 +287,24 @@ then by using (\refeq{eq:qboundinfnorm}) and (\refeq{eq:2cproblem})
         &\leq \frac{2\|\mathbf{Q} - \mathcal{T}_Q\mathbf{Q}\|_\infty}{1-\gamma}.
     \end{split}
 \end{equation*}
+\subsection*{3. Convergence of inexact policy iteration}
+An inexact policy iteration in which we compute $\mathbf{V}_t$ such that
+\begin{equation*}
+    \max_{s \in S}\left|\mathbf{V}_t(s) - \mathbf{V}^{\pi_t}(s)\right| \leq \epsilon
+\end{equation*}
+for some $\epsilon > 0$, with a greedy policy for $\pi_{t+1}$ with respect to $\mathbf{V}_t$, satisfies
+\begin{equation}
+    \lim_{t \rightarrow \infty} \sup \max_{s \in S}\left| \mathbf{V}^{\pi_t}(s) - \mathbf{V}^*(s)\right| \leq \frac{2\gamma\epsilon}{(1-\gamma)^2}.
+\end{equation}
+To show this, we can use the fact that both Bellman operators are $\gamma$-contractions, as shown in the results of \textbf{2.b)}, the convergence of policy iteration
+\begin{equation*}
+    \|\mathbf{V}^{\pi_t} - \mathbf{V}^*\|_\infty \leq \gamma^t\|\mathbf{V}^{\pi_0} - \mathbf{V}^*\|_\infty,
+\end{equation*}
+and
+\begin{equation*}
+    \mathbf{V}^* \geq \mathbf{V}^{\pi_t} \geq \mathcal{T}\mathbf{V}^{\pi_{t-1}},
+\end{equation*}
+where an additional error term could be induced each time the Bellman operators are applied.
 
 \section*{Assignment 2}
 \subsection*{1. Monte Carlo and TD learning}
@@ -317,14 +335,46 @@ An MDP $\tilde{\mathcal{M}}$ is defined by
 		\tilde{r}(s,a) &= (1-\epsilon)r(s,a) +  \frac{\epsilon}{|\mathcal{A}|}\sum_{a' \in \mathcal{A}}r(s,a'),
 	\end{split}	
 \end{equation}
-from here, and by using Bellman optimality equations, we can define analogously 
+from here, by using Bellman optimality equations, we can define analogously 
 \begin{equation}
 	\begin{split}
 		\tilde{V}^*(s) &= \max_{a \in \mathcal{A}} \Big[\tilde{r}(s,a) + \gamma \sum_{s'\in S} \tilde{P}(s'|s,a)\tilde{V}^*(s')\Big] \\
 		&= \max_{a \in \mathcal{A}} \Big[(1-\epsilon)r(s,a) +  \frac{\epsilon}{|\mathcal{A}|}\sum_{a' \in \mathcal{A}}r(s,a') + \gamma \sum_{s'\in S} \Big((1-\epsilon)P(s'|s,a) + \frac{\epsilon}{|\mathcal{A}|}\sum_{a' \in \mathcal{A}}P(s'|s,a')\Big)\Big] \\
-		&= \dots
+		&= \frac{\epsilon}{|\mathcal{A}|}\sum_{a' \in \mathcal{A}}r(s,a') + \frac{\gamma \epsilon}{|\mathcal{A}|}\sum_{s'\in S, a' \in \mathcal{A}}P(s'|s,a') + \max_{a \in \mathcal{A}} \Big[(1-\epsilon)r(s,a) + \sum_{s' \in S} (\gamma-\gamma\epsilon)P(s'|s,a')\Big],
 	\end{split}
 \end{equation}
+
 \at{unfinished}
+
+\subsection*{3. Alternative proof of policy gradient}
+
 \subsection*{4. Policy optimization under different parameterization}
+Given the same Markov decision process as in \textbf{problem 1 of Assignment 1}:
+\subsubsection*{a)}
+a policy class parameterized by two parameters:
+\begin{equation*}
+    \pi(\text{stay}|A) = \theta_1, ~~ \pi(\text{stay}|A) = \theta_2, ~~ \theta_1, \theta_2 \in [0,1], ~~ \mathbf{\boldsymbol\theta} = (\theta_1, \theta_2),
+\end{equation*}
+has the value function $V^{\pi(\boldsymbol\theta)}(A)$
+\begin{equation*}
+    \begin{split}
+        V^{\pi(\boldsymbol\theta)}(A) &= \sum_a \pi(a|A)Q^{\pi(\boldsymbol{\theta})}(A,a)    \\
+        &= \theta_1 Q^{\pi(\boldsymbol{\theta})}(A,\text{stay}) + (1-\theta_1)Q^{\pi(\boldsymbol{\theta})}(A,\text{switch})\\
+        &= \theta_1r(A,\text{switch}) + \gamma\theta_1\sum_{s'}P(s'|A,\text{stay})V^{\pi(\boldsymbol\theta)}(s')\\ & + (1-\theta_1)r(A,\text{stay}) + (1-\theta_1)\gamma\sum_{s'}P(s'|A,\text{switch})V^{\pi(\boldsymbol\theta)}(s') \\
+        &= \theta_1 + \gamma\theta_1V^{\pi(\boldsymbol\theta)}(A) + (1 - \theta_1)\gamma V^{\pi(\boldsymbol\theta)}(B),
+    \end{split}
+\end{equation*}
+similarly for $V^{\pi(\boldsymbol\theta)}(B)$
+\begin{equation*}
+    V^{\pi(\boldsymbol\theta)}(B) = \theta_2 + \gamma\theta_2V^{\pi(\boldsymbol\theta)}(A) + (1-\theta_2)\gamma V^{\pi(\boldsymbol\theta)}(B).
+\end{equation*}
+Then we simplify $V^{\pi(\boldsymbol\theta)}(A)$ using $V^{\pi(\boldsymbol\theta)}(B)$, vice versa for $V^{\pi(\boldsymbol\theta)}(B)$
+\begin{equation*}
+    \begin{split}
+        V^{\pi(\boldsymbol\theta)}(A) &= \theta_1 + \gamma\theta_1V^{\pi(\boldsymbol\theta)}(A) + \frac{(\gamma - \gamma\theta_1)(\theta_2 + \gamma\theta_2V^{\pi(\boldsymbol\theta)}(A))}{1-\gamma+\gamma\theta_2}     \\
+        &= \frac{\theta_1 - \gamma(\theta_1 - \theta_2)}{(\gamma-1)(\gamma(\theta_1 - \theta_2)-1)}, \\
+        V^{\pi(\boldsymbol\theta)}(B) &= \frac{\theta_2}{(\gamma-1)(\gamma(\theta_1 - \theta_2)-1)}.
+    \end{split}
+\end{equation*}
+We can test the concavity by checking whether each value function has negative-semidefinite Hessian.
 \end{document}
