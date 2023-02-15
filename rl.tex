@@ -309,7 +309,7 @@ where an additional error term could be induced each time the Bellman operators 
 
 \section*{Assignment 2}
 \subsection*{1. Monte Carlo and TD learning}
-For this exercise, all of the algorithms are implemented in Julia programming language, the complete code is attached in the Appendix (also available in my github repository: \url{https://github.com/berylgithub/ORLex/blob/main/rl.jl}).
+For this exercise, all of the algorithms are implemented in \textbf{Julia} programming language, the complete code is attached in the Appendix (also available in my github repository: \url{https://github.com/berylgithub/ORLex/blob/main/rl.jl}).
 
 Consider an MDP $\mathcal{M} = (\mathcal{S}, \mathcal{A}, \mathcal{P}, r,\mu, \gamma)$ with
 \begin{equation*}
@@ -385,9 +385,9 @@ i.e.,
 \begin{equation*}
     V^{\pi}(A) = 1.083, ~~ V^{\pi}(B) = 1.833.
 \end{equation*}
-Similarly for FVMC, we call
+Similarly for EVMC, we call
 \begin{jllisting}
-    Vs = fvmc(["A", "B"], S, R, γ)  # fvmc caller
+    Vs = evmc(["A", "B"], S, R, γ)  # evmc caller
 \end{jllisting}
 and we get
 \begin{equation*}
@@ -395,7 +395,12 @@ and we get
 \end{equation*}
 
 \subsubsection*{b)}
-TD0:
+Temporal difference (TD) learning simply updates a $V(s_t)$ using the information of the observed immediate reward $r_{t+1}$ when transitioning to $s_{t+1}$ ("looking ahead" to the next states), formally
+\begin{equation}
+    V(s_t) \leftarrow V(s_t) + \alpha[r_{t+1} + \gamma V(s_{t+1}) - V(s_t)],
+\end{equation}
+in fact, this is the TD(0) algorithm. Meanwhile, TD(2) looks 2 steps ahead, i.e., uses also the information of $r_{t+2}$ and $s_{t+2}$.
+The code for TD(0) algorithm is as the following:
 \begin{jllisting}
     function TD0(states, S, R, γ, α)
         V = zeros(length(states)) # output
@@ -410,7 +415,7 @@ TD0:
         return V
     end
 \end{jllisting}
-TD2:
+and, for TD(2):
 \begin{jllisting}
     function TD2(states, S, R, γ, α)
         V = zeros(length(states)) # output
@@ -427,6 +432,46 @@ TD2:
         return V
     end
 \end{jllisting}
+
+
+Given a trajectory $[A,B,A,A,B,T]$, learning rate $\alpha=0.1$, and the value functions initialized by $\mathbf{V} = (0. ,0.)$, encoded as
+\begin{jllisting}
+    S = [1,2,1,1,2]
+    A = [2,2,1,2,1] # actions matter for SARSA and Q-learning
+    R = Vector{Float64}([0,1,1,0,2])
+\end{jllisting}
+note here the immediate observed reward after transitioning to the next state is encoded as $r_{t}$ instead of $r_{t+1}$.
+From here we can estimate the value functions in an online fashion:
+\begin{table}[H]
+    \centering
+    \caption{Estimation of value functions using TD(0) algorithm. From here we obtain the estimated value functions: $V(A) = 0.095$ and $V(B) = 0.29$.}
+    \label{tab:TD0}
+    \begin{tabular}{|l|l|l|l|l|}
+    \hline
+    $t$ & $s_{t}$ & $r_{t}$ & $V(s_{t+1})$ & $V(s_t)$ \\ \hline
+    1   & 1       & 0.      & 0.           & 0.       \\ \hline
+    2   & 2       & 1.      & 0.           & 0.1      \\ \hline
+    3   & 1       & 1.      & 0.1          & 0.1      \\ \hline
+    4   & 1       & 0.      & 0.           & 0.095    \\ \hline
+    5   & 2       & 2.      & 0.           & 0.29     \\ \hline
+    \end{tabular}
+\end{table}
+
+
+\begin{table}[H]
+    \centering
+    \caption{Estimation of value functions using TD(2) algorithm. From here we obtain the estimated value functions: $V(A) = 0.2339$ and $V(B) = 0.336125$.}
+    \label{tab:TD2}
+    \begin{tabular}{|l|l|l|l|l|l|}
+    \hline
+    $t$ & $s_{t}$ & $r_{t}$ & $r_{t+1}$ & $V(s_{t+1})$ & $V(s_t)$ \\ \hline
+    1   & 1       & 0.      & 1.        & 0.05         & 0.05     \\ \hline
+    2   & 2       & 1.      & 1.        & 0.05         & 0.15125  \\ \hline
+    3   & 1       & 1.      & 0.        & 0.15125      & 0.14878  \\ \hline
+    4   & 1       & 0.      & 0.        & 0.           & 0.2339   \\ \hline
+    5   & 2       & 2.      & 0.        & 0.           & 0.336125 \\ \hline
+    \end{tabular}
+\end{table}
 
 SARSA:
 \begin{jllisting}
@@ -536,7 +581,7 @@ then
 
 \newpage
 \begin{appendices}
-    Julia code for \textbf{problem 1 of assignment 2}:
+    complete Julia code for \textbf{problem 1 of assignment 2}:
     \jlinputlisting{rl.jl}
 \end{appendices}
 \end{document}
