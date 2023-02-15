@@ -614,9 +614,10 @@ from here, by using Bellman optimality equations, we can define analogously
 	\end{split}
 \end{equation}
 
-\subsubsection*{c)} \at{TBD}
-\subsection*{3. Alternative proof of policy gradient}
-\at{TBD}
+\subsubsection*{c)} Given the usual MDP $\mathcal{M} = (\mathcal{S}, \mathcal{A}, \mathcal{P}, r, \mu, \gamma)$ the $\epsilon$-soft policy can find the best policy among the $\epsilon$-soft policies due to the the greedy step, i.e.,
+\begin{equation*}
+    a^* \leftarrow \argmax_{a}\mathbf{Q}^{\pi_t}(s,a).
+\end{equation*}
 \subsection*{4. Policy optimization under different parameterization}
 Given the same Markov decision process as in \textbf{problem 1 of Assignment 1}:
 \subsubsection*{a)}
