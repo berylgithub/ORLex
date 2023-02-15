@@ -645,7 +645,27 @@ Then we simplify $V^{\pi(\boldsymbol\theta)}(A)$ using $V^{\pi(\boldsymbol\theta
         V^{\pi(\boldsymbol\theta)}(B) &= \frac{\theta_2}{(\gamma-1)(\gamma(\theta_1 - \theta_2)-1)}.
     \end{split}
 \end{equation*}
-The concavity can be tested by checking whether each value function has negative-semidefinite Hessian matrix.
+The concavity for each value function can be tested by checking whether the Hessian matrix is negative-semidefinite.
+For example, the Hessian matrix of $V^{\pi(\boldsymbol{\theta})}(B)$ is
+\begin{equation*}
+    \mathbf{H}(V(B)) = 
+    \begin{pmatrix}
+        \frac{2\gamma^2\theta_2}{c} & \frac{\gamma^2\theta_2+\gamma^2\theta_1-\gamma}{c} \\
+        \frac{\gamma^2\theta_2+\gamma^2\theta_1-\gamma}{c} & \frac{2\gamma^2\theta_1 - 2\gamma}{c}
+    \end{pmatrix}
+\end{equation*}
+where 
+\begin{equation*}
+    c = (\gamma-1)(\gamma(\theta_2 - \theta_1)+1)^3,
+\end{equation*}
+from here we can obtain the eigenvalues:
+\begin{equation*}
+    \begin{split}
+        \lambda_1 = \gamma\Big(-\sqrt{2}\sqrt{\gamma^2\theta_2^2 + \gamma^2\theta_1^2 - 2\gamma\theta_1 + 1} + \gamma\theta_1 + \gamma\theta_2 - 1\Big), \\
+        \lambda_2 = \gamma\Big(\sqrt{2}\sqrt{\gamma^2\theta_2^2 + \gamma^2\theta_1^2 - 2\gamma\theta_1 + 1} + \gamma\theta_1 + \gamma\theta_2 - 1\Big), \\
+    \end{split}
+\end{equation*}
+this shows that the Hessian is indefinite, which implies non concavity.
 \subsubsection*{b)}
 Given a policy class:
 \begin{equation}
@@ -659,7 +679,7 @@ setting both $\theta_1 = \theta$ and $\theta_2 = \theta$, we have
 \begin{equation*}
     V^{\pi(\boldsymbol\theta)}(A) = V^{\pi(\boldsymbol\theta)}(B) = \frac{\theta}{1-\gamma}.
 \end{equation*}
-It is clear that both value functions are linear, which imply the concavity.
+Both state--value functions are linear, which imply the concavity.
 \subsubsection*{c)}
 Similarly to \textbf{2.b)}, given
 \begin{equation*}
