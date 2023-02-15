@@ -328,7 +328,7 @@ First-visit MC (FVMC) averages the returns following first visits to $s$, while 
             &= r_{t+1} +\gamma(G_{t+1}),
     \end{split}
 \end{equation}
-from this formula, we can compute the returns for both MC algorithms backward,i.e., $t=T-1,...,0$. 
+from this formula, we can compute the returns for both MC algorithms backward,i.e., $t=T-1,...,0$; in this way, the computation will be more efficient compared to re-computing $G_{t+1}$ each time $G_{t}$ is queried. 
 The codes for both FVMC and EVMC are implemented by computing the returns backward. 
 The function which computes the estimation of $V^{\pi}(s)$ using the FVMC is as the following:
 \begin{jllisting}
@@ -442,6 +442,16 @@ Given a trajectory $[A,B,A,A,B,T]$, learning rate $\alpha=0.1$, and the value fu
 \end{jllisting}
 note here the immediate observed reward after transitioning to the next state is encoded as $r_{t}$ instead of $r_{t+1}$.
 From here we can estimate the value functions in an online fashion:
+\begin{itemize}
+    \item TD(0) by calling:
+    \begin{jllisting}
+        V = TD0(["A", "B"],S, R, γ, α)
+    \end{jllisting}
+    \item TD(2) by calling:
+    \begin{jllisting}
+        V = TD2(["A", "B"],S, R, γ, α)
+    \end{jllisting}
+\end{itemize}
 \begin{table}[H]
     \centering
     \caption{Estimation of value functions using TD(0) algorithm. From here we obtain the estimated value functions: $V(A) = 0.095$ and $V(B) = 0.29$.}
@@ -473,7 +483,11 @@ From here we can estimate the value functions in an online fashion:
     \end{tabular}
 \end{table}
 
-SARSA:
+We can estimate state-action value functions $Q(s,a)$ by using the SARSA algorithm. SARSA is an on policy TD-control algorithm which makes use the information of $s_t,a_t,r_{t+1},s_{t+1},a_{t+1}$, (hence SARSA), formally
+\begin{equation}
+    Q(s_t,a_t) \leftarrow Q(s_t, a_t) + \alpha[r_{t+1} + \gamma Q(s_{t+1}, a_{t+1}) - Q(s_t, a_t)],
+\end{equation}
+the implementation of SARSA is as the following:
 \begin{jllisting}
     function SARSA(states, acts, S, A, R, γ, α)
         Q = zeros(length(states), length(acts)) # is a matrix instead of a vector like V
@@ -488,6 +502,83 @@ SARSA:
         return Q
     end
 \end{jllisting}
+On the other hand, Q-learning is an off-policy TD control, almost similar to SARSA except that Q-learning uses the information of the maximum state-action value function of the next state, formally
+\begin{equation}
+    Q(s_t,a_t) \leftarrow Q(s_t, a_t) + \alpha[r_{t+1} + \gamma \max_{a\in\mathcal{A}}Q(s_{t+1}, a) - Q(s_t, a_t)],
+\end{equation}
+it is implemented as the following:
+\begin{jllisting}
+    function Qlearn(states, acts, S, A, R, γ, α)
+        Q = zeros(length(states), length(acts)) # is a matrix instead of a vector like V
+        acts = Vector{Int}(eachindex(acts)) # just in case if acts is a vector of string, reencode here
+        for t ∈ eachindex(S)
+            if t == length(S) # = SARSA since max_a Q(terminal,a) = 0 anyways
+                Q[S[t], A[t]] += ( α*(R[t] - Q[S[t], A[t]]) )
+                println([Int(t), Int(S[t]), Int(A[t]), R[t], Q[S[t], A[t]]])
+            else # update by max_a Q(s_t+1,a)
+                # findmax:
+                Qmax = -Inf
+                for i ∈ eachindex(acts)
+                    if Q[S[t+1], acts[i]] > Qmax
+                        Qmax = Q[S[t+1], acts[i]]
+                    end
+                end
+                Q[S[t], A[t]] += ( α*(R[t] + γ*Qmax - Q[S[t], A[t]]) ) 
+                println([Int(t), Int(S[t]), Int(A[t]), R[t], Q[S[t], A[t]], Qmax])
+            end
+        end
+        return Q
+    end
+\end{jllisting}
+
+Given the same scenario (trajectories and learning rate) as in the previous one, and the state-action value functions initialized by
+\begin{equation*}
+    \mathbf{Q} = 
+    \begin{pmatrix}
+        0. & 0. \\
+        0. & 0.
+    \end{pmatrix},
+\end{equation*}
+we can estimate $Q(s,a)$ in an online fashion:
+\begin{itemize}
+    \item SARSA, by calling:
+    \begin{jllisting}
+        Q = SARSA(["A", "B"], ["stay", "switch"], S, A, R, γ, α)
+    \end{jllisting}
+    \item Q-learning, by calling:
+    \begin{jllisting}
+        Q = Qlearn(["A", "B"], ["stay", "switch"], S, A, R, γ, α)
+    \end{jllisting}
+\end{itemize}
+\begin{table}[H]
+    \centering
+    \caption{Estimation of state-action value functions using SARSA. The final matrix is $\mathbf{Q} = [0.1~0.0; 0.2~0.1]$}
+    \label{tab:SARSA}
+    \begin{tabular}{|l|l|l|l|l|l|}
+    \hline
+    $t$ & $s_{t}$ & $a_t$ & $r_{t}$ & $Q(s_{t+1}, a_{t+1})$ & $Q(s_t, a_t)$ \\ \hline
+    1   & 1       & 2     & 0.      & 0.                    & 0.            \\ \hline
+    2   & 2       & 2     & 1.      & 0.                    & 0.1           \\ \hline
+    3   & 1       & 1     & 1.      & 0.                    & 0.1           \\ \hline
+    4   & 1       & 2     & 0.      & 0.                    & 0.            \\ \hline
+    5   & 2       & 1     & 2.      & 0.                    & 0.2           \\ \hline
+    \end{tabular}
+\end{table}
+\begin{table}[H]
+    \centering
+    \caption{Estimation of state-action value functions using Q-learning. The final matrix is $\mathbf{Q} = [0.1~0.005; 0.2~0.1]$}
+    \label{tab:Qlearn}
+    \begin{tabular}{|l|l|l|l|l|l|}
+    \hline
+    $t$ & $s_{t}$ & $a_t$ & $r_{t}$ & $\max_aQ(s_{t+1}, a)$ & $Q(s_t, a_t)$ \\ \hline
+    1   & 1       & 2     & 0.      & 0.                    & 0.            \\ \hline
+    2   & 2       & 2     & 1.      & 0.                    & 0.1           \\ \hline
+    3   & 1       & 1     & 1.      & 0.                    & 0.1           \\ \hline
+    4   & 1       & 2     & 0.      & 0.1                   & 0.005         \\ \hline
+    5   & 2       & 1     & 2.      & 0.                    & 0.2           \\ \hline
+    \end{tabular}
+\end{table}
+
 
 \subsection*{2. Control with $\epsilon$-greedy policy}
 \subsubsection*{a)}
