@@ -311,7 +311,7 @@ where an additional error term could be induced each time the Bellman operators 
 \subsection*{1. Monte Carlo and TD learning}
 For this exercise, all of the algorithms are implemented in Julia programming language, the complete code is attached in the Appendix (also available in my github repository: \url{https://github.com/berylgithub/ORLex/blob/main/rl.jl}).
 
-Given an MDP $\mathcal{M} = (\mathcal{S}, \mathcal{A}, \mathcal{P}, r,\mu, \gamma)$ with
+Consider an MDP $\mathcal{M} = (\mathcal{S}, \mathcal{A}, \mathcal{P}, r,\mu, \gamma)$ with
 \begin{equation*}
     \begin{split}
         &\mathcal{S} = \{A,B,T\}, ~~ \mathcal{A} = \{\text{switch},\text{stay}\}, \\
@@ -320,9 +320,17 @@ Given an MDP $\mathcal{M} = (\mathcal{S}, \mathcal{A}, \mathcal{P}, r,\mu, \gamm
     \end{split}
 \end{equation*}
 \subsubsection*{a)}
-Trajectories $[A,A,B,T], [A,B,A,B,T]$ and $[A,B,T]$ are sampled from policy $\pi$... \at{to be continued..}
-
-First visit MC:
+First-visit MC (FVMC) averages the returns following first visits to $s$, while every-fisit MC (EVMC) averages the returns following all visits to $s$. The return at time step $t$ is defined by
+\begin{equation}
+    \begin{split}
+        G_t &= r_{t+1} + \gamma r_{t+2} + \gamma^2 r_{t+3} + ... \\
+            &= r_{t+1} +\gamma(r_{t+2} + \gamma^2 r_{t+3} + ...) \\
+            &= r_{t+1} +\gamma(G_{t+1}),
+    \end{split}
+\end{equation}
+from this formula, we can compute the returns for both MC algorithms backward,i.e., $t=T-1,...,0$. 
+The codes for both FVMC and EVMC are implemented by computing the returns backward. 
+The function which computes the estimation of $V^{\pi}(s)$ using the FVMC is as the following:
 \begin{jllisting}
     function fvmc(states, S, R, γ)
         n = zeros(Int, length(states)) # n_ts[i] := counter of visiting state i
@@ -342,8 +350,7 @@ First visit MC:
         return Vs ./ n # average V(s) := V(s)/n(s)
     end
 \end{jllisting}
-
-Every visit MC:
+For EVMC, the code is as follows:
 \begin{jllisting}
     function evmc(states, S, R, γ)
         n = zeros(Int, length(states)) # n_ts[i] := counter of visiting state i
@@ -360,6 +367,33 @@ Every visit MC:
         return Vs ./ n # average V(s) := V(s)/n(s)
     end
 \end{jllisting}
+Given trajectories $[A,A,B,T], [A,B,A,B,T]$ and $[A,B,T]$ sampled from policy $\pi$ and $\gamma = .5$ encoded as
+\begin{jllisting}
+    S = [[1,1,2],[1,2,1,2], [1,2]] # 1a:  [A, A, B, T], [A, B, A, B, T], [A, B, T]
+    A = [[1,2,1],[2,2,2,1], [2,1]] # actions dont matter for computation
+    R = Vector{Vector{Float64}}([[1,0,2], [0,1,0,2], [0,2]])
+\end{jllisting}
+we can call the FVMC by:
+\begin{jllisting}
+    Vs = fvmc(["A", "B"], S, R, γ)  # fvmc caller
+\end{jllisting}
+here we obtain the estimated value functions:
+\begin{jllisting}
+    Vs = [1.0833333333333333, 1.8333333333333333]
+\end{jllisting}
+i.e., 
+\begin{equation*}
+    V^{\pi}(A) = 1.083, ~~ V^{\pi}(B) = 1.833.
+\end{equation*}
+Similarly for FVMC, we call
+\begin{jllisting}
+    Vs = fvmc(["A", "B"], S, R, γ)  # fvmc caller
+\end{jllisting}
+and we get
+\begin{equation*}
+    V^{\pi}(A) = 1.05, ~~ V^{\pi}(B) = 1.875.
+\end{equation*}
+
 \subsubsection*{b)}
 TD0:
 \begin{jllisting}
